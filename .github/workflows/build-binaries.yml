@@ -69,7 +69,7 @@ jobs:
           codesign --force --deep --sign - dist/Poppee.app
           ditto -c -k --keepParent dist/Poppee.app "poppee-${{ steps.version.outputs.version }}-${{ matrix.target }}.zip"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: binary-${{ matrix.target }}
           path: |
