@@ -1,0 +1,78 @@
+name: Build binaries
+
+# Reusable workflow: standalone PyInstaller builds for Linux, Windows and macOS.
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Oldest supported Ubuntu, so the binary runs on older glibc versions too.
+          - os: ubuntu-22.04
+            target: linux-x64
+          - os: windows-latest
+            target: windows-x64
+          - os: macos-latest
+            target: macos-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          version=$(python -c "import re,pathlib;print(re.search(r'__version__ = \"([^\"]+)\"', pathlib.Path('src/poppee/__init__.py').read_text()).group(1))")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Install
+        run: pip install ".[bundle]"
+
+      - name: Build
+        run: |
+          python packaging/make_icons.py
+          pyinstaller --noconfirm packaging/poppee.spec
+
+      - name: Smoke test and package (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          ./dist/poppee/poppee --version
+          POPPEE_CONFIG_DIR="$RUNNER_TEMP/c" POPPEE_DATA_DIR="$RUNNER_TEMP/d" ./dist/poppee/poppee init
+          tar -C dist -czf "poppee-${{ steps.version.outputs.version }}-${{ matrix.target }}.tar.gz" poppee
+
+      - name: Smoke test and package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          ./dist/poppee/poppee.exe --version
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (-not (Test-Path ./dist/poppee/poppee-tray.exe)) { throw "poppee-tray.exe missing" }
+          Compress-Archive -Path dist/poppee -DestinationPath "poppee-${{ steps.version.outputs.version }}-${{ matrix.target }}.zip"
+
+      - name: Smoke test and package (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          ./dist/Poppee.app/Contents/MacOS/Poppee --version
+          # Ad-hoc signature so Apple Silicon will launch it after the quarantine flag is removed.
+          codesign --force --deep --sign - dist/Poppee.app
+          ditto -c -k --keepParent dist/Poppee.app "poppee-${{ steps.version.outputs.version }}-${{ matrix.target }}.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: |
+            poppee-*.tar.gz
+            poppee-*.zip
+          if-no-files-found: error

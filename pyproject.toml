@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "poppee"
+dynamic = ["version"]
+description = "Free multi-account Gmail notifier (OAuth2) with a tray icon and native desktop notifications"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Al West" }]
+keywords = ["gmail", "notifier", "oauth2", "tray", "notifications", "poppeeper"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Communications :: Email",
+]
+dependencies = [
+    "google-auth>=2.20",
+    "google-auth-oauthlib>=1.0",
+    "requests>=2.31",
+    "platformdirs>=4.0",
+    "pystray>=0.19.5",
+    "Pillow>=10.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "build>=1.2", "twine>=5"]
+bundle = ["pyinstaller>=6.10"]
+
+[project.scripts]
+poppee = "poppee.cli:main"
+
+[project.gui-scripts]
+# On Windows this runs without opening a console window.
+poppee-tray = "poppee.cli:main_tray"
+
+[tool.hatch.version]
+path = "src/poppee/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/poppee"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/poppee", "tests", "packaging", "README.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["poppee"]
+omit = ["*/poppee/tray.py", "*/poppee/__main__.py"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
