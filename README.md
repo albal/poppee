@@ -41,10 +41,15 @@ pipx install poppee        # or: pip install --user poppee
 Google doesn't let open-source desktop apps ship a shared Gmail client secret, so you
 create your own. It's free.
 
-1. Open <https://console.cloud.google.com/> and **create a project**, for example "Poppee".
+1. Open <https://console.cloud.google.com/> and **create a new project**, for example
+   "Poppee". Use the project picker at the top → **New project**. A dedicated project is
+   best, because the consent-screen settings below apply to every app in the project. No
+   billing account is needed.
 2. Go to **APIs & Services → Library**, search for **Gmail API** and click **Enable**.
-3. Go to **Google Auth Platform → Branding** (the "OAuth consent screen"). Choose
-   **External**, then enter an app name and your email address.
+3. In the **APIs & Services** sidebar, click **OAuth consent screen**. This opens the
+   **Google Auth Platform** pages, which have **Branding**, **Audience** and **Clients** in
+   their own sidebar. You can also search the console for "Google Auth Platform". If it asks
+   you to **Get started**, choose **External**, then enter an app name and your email address.
 4. Under **Audience**, click **Publish app** so the status is **In production**.
    > ⚠️ In **Testing** status, Google expires sign-ins after **7 days**. Publishing
    > fixes that. Google won't review it, and it works fine for personal use (up to 100 users).
