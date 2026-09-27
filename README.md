@@ -141,6 +141,37 @@ for example for a portable install on a USB stick.
 - **Windows:** native toast notifications that open the message when clicked. Use
   `poppee-tray.exe` so no console window appears.
 
+## Troubleshooting
+
+**"Error 403: access_denied" when adding an account.** Your OAuth app is still in
+**Testing** mode and that account isn't a test user. In **Google Auth Platform → Audience**,
+click **Publish app** so the status is **In production**. Then run `poppee add-account`
+again. Also re-add any accounts you signed in while in Testing, because those sign-ins expire
+after 7 days: `poppee add-account --email you@example.com` replaces the stored token.
+
+**"Error 403: org_internal".** The project belongs to a Google Workspace organization and its
+user type is **Internal**, so only accounts in that organization can sign in. Under
+**Audience**, click **Make external**, then publish the app.
+
+**"This app hasn't been verified by Google".** This is expected. You are the "app
+developer" it mentions, so click **Continue** (or **Advanced → Go to Poppee**). The line
+about access being "lost" is generic wording and doesn't apply to personal use. Unverified
+apps are limited to 100 users, and sign-ins in production don't expire. Verification isn't
+worth it, because Gmail read access is a "restricted" permission that needs a paid annual
+security assessment. Each account sees this screen once, on its first sign-in.
+
+**Hide the warning for a Google Workspace domain (optional).** If you administer the
+Workspace account, open the Admin console, go to **Security → Access and data control → API
+controls → Manage third-party app access**, add your OAuth client ID and set it to
+**Trusted**. Users in that domain then won't see the warning. This isn't possible for
+`@gmail.com` accounts.
+
+**An account shows "Sign-in needed" in the tray.** Its token was revoked, expired (Testing
+mode) or the password changed. Run `poppee add-account --email that@account` again.
+
+**No notifications.** Run `poppee test-notify`, then check the log. `poppee config --all`
+shows where the log is. On Linux, `notify-send` comes from the `libnotify-bin` package.
+
 ## How it works
 
 For every account, Poppee asks the Gmail API for the ids of messages that match the
