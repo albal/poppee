@@ -53,6 +53,12 @@ create your own. It's free.
 5. Under **Clients**, choose **Create client → Application type: Desktop app**, then click
    **Download JSON**.
 
+> **You only do this once, not once per Gmail account.** Create the project in any Google
+> account you like. That one client file works for all your accounts: each one is added
+> later with a quick `poppee add-account` sign-in. Because the app is published, the
+> other accounts don't need to be added as test users. Each account shows the "unverified
+> app" screen once, on its first sign-in.
+
 ## 3. Configure
 
 ```bash
